@@ -17,8 +17,8 @@ def try_harder(src, dst):
     st = os.stat(src)
     offset = 0
     blocksize = st.st_blksize
-    src_fd = os.open(src, os.O_RDONLY | os.O_BINARY)
-    dst_fd = os.open(dst, os.O_WRONLY | os.O_CREAT | os.O_BINARY)
+    src_fd = os.open(src, os.O_RDONLY)
+    dst_fd = os.open(dst, os.O_WRONLY | os.O_CREAT)
     while offset < st.st_size:
         try:
             buf = os.pread(src_fd, blocksize, offset)
