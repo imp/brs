@@ -12,22 +12,28 @@ def try_harder(src, dst):
     st = os.stat(src)
     offset = 0
     blocksize = st.st_blksize
-    src_fd = os.open(src, os.O_RDONLY | os.O_BINARY)
-    dst_fd = os.open(dst, os.O_WRONLY | os.O_CREAT | os.O_BINARY)
+    src_fd = os.open(src, os.O_RDONLY)
+    dst_fd = os.open(dst, os.O_WRONLY | os.O_CREAT)
+    good = 0
+    bad = 0
+    print(" #", src)
     while offset < st.st_size:
         try:
             buf = os.pread(src_fd, blocksize, offset)
         except Exception as e:
-            print(" #", src, "bad block of", blocksize, "@", offset)
+            bad += 1
+            print("X", end="", flush=True)
         else:
             os.pwrite(dst_fd, buf, offset)
+            good += 1
+            print(".", end="", flush=True)
         offset += len(buf)
-
-    os.close(src_fd)
-    os.close(dst_fd)
 
     shutil.copystat(src, dst)
     shutil.chown(dst, st.st_uid, st.st_gid)
+
+    print("")
+    print("# Total (good/bad):", good, "/", bad)
 
 
 try_harder(_from, _to)
