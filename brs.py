@@ -13,6 +13,28 @@ badfiles = []
 all_files = 0
 
 
+def try_harder(src, dst):
+    st = os.stat(src)
+    offset = 0
+    blocksize = st.st_blksize
+    src_fd = os.open(src, os.O_RDONLY | os.O_BINARY)
+    dst_fd = os.open(dst, os.O_WRONLY | os.O_CREAT | os.O_BINARY)
+    while offset < st.st_size:
+        try:
+            buf = os.pread(src_fd, blocksize, offset)
+        except Exception as e:
+            print(" #", src, "bad block of", blocksize, "@", offset)
+        else:
+            os.pwrite(dst_fd, buf, offset)
+        offset += len(buf)
+
+    os.close(src_fd)
+    os.close(dst_fd)
+
+    shutil.copystat(src, dst)
+    shutil.chown(dst, st.st_uid, st.st_gid)
+
+
 def _copy(src, dst, *, follow_symlinks=True):
     global all_files, _from
     relpath = os.path.relpath(src, _from)
