@@ -21,13 +21,14 @@ def try_harder(src, dst):
         try:
             buf = os.pread(src_fd, blocksize, offset)
         except Exception as e:
+            offset += len(blocksize)
             bad += 1
             print("X", end="", flush=True)
         else:
             os.pwrite(dst_fd, buf, offset)
+            offset += len(buf)
             good += 1
             print(".", end="", flush=True)
-        offset += len(buf)
 
     shutil.copystat(src, dst)
     shutil.chown(dst, st.st_uid, st.st_gid)
